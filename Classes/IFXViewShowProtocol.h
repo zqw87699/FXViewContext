@@ -10,9 +10,9 @@
 
 typedef NS_ENUM(NSInteger,FXViewPushType){
     /*
-     *  无效果
+     *  警告
      */
-    FXViewPushTypeNone=0,
+    FXViewPushTypeAlert=0,
     
     /*
      *  左推入

@@ -10,6 +10,7 @@
 #import "Masonry.h"
 #import "ReactiveObjC.h"
 #import "FXCommon.h"
+#import "FXAnimateContext.h"
 
 @interface FXViewContext()
 
@@ -31,9 +32,9 @@ DEF_SINGLETON_INIT(FXViewContext)
 
 - (void)singleInit{
     self.animatedDuration = 0.25f;
-    self.hasBackground = NO;
+    self.hasBackground = YES;
     self.backgroundAlpha = 0.3f;
-    self.pushType = FXViewPushTypeNone;
+    self.pushType = FXViewPushTypeAlert;
     self.touchClose = YES;
 }
 
@@ -84,12 +85,15 @@ DEF_SINGLETON_INIT(FXViewContext)
             duration = [view animatedDuration];
         }
         switch (type) {
-            case FXViewPushTypeNone:{
+            case FXViewPushTypeAlert:{
                 [view mas_makeConstraints:^(MASConstraintMaker *make) {
-                    make.center.equalTo(view.superview);
+                    make.centerX.equalTo(view.superview.mas_centerX);
+                    make.centerY.equalTo(view.superview.mas_centerY);
                     make.width.equalTo(@([view viewSize].width));
                     make.height.equalTo(@([view viewSize].height));
                 }];
+                [view.superview layoutIfNeeded];
+                [[FXAnimateContext sharedInstance] alertView:view Duration:duration Block:nil];
                 break;
             }
             case FXViewPushTypeLeft:{
@@ -100,22 +104,18 @@ DEF_SINGLETON_INIT(FXViewContext)
                     make.width.equalTo(@([view viewSize].width));
                 }];
                 [view.superview layoutIfNeeded];//强制绘制
-                [view mas_updateConstraints:^(MASConstraintMaker *make) {
-                    make.left.equalTo(view.superview.mas_left);
-                }];
+                [[FXAnimateContext sharedInstance] horizontalMove:view Duration:duration Distance:[view viewSize].width Block:nil];
                 break;
             }
             case FXViewPushTypeRight:{
                 [view mas_makeConstraints:^(MASConstraintMaker *make) {
                     make.top.equalTo(view.superview.mas_top);
                     make.bottom.equalTo(view.superview.mas_bottom);
-                    make.right.equalTo(@(view.superview.frame.size.width+[view viewSize].width));
+                    make.left.equalTo(view.superview.mas_right);
                     make.width.equalTo(@([view viewSize].width));
                 }];
                 [view.superview layoutIfNeeded];//强制绘制
-                [view mas_updateConstraints:^(MASConstraintMaker *make) {
-                    make.right.equalTo(view.superview.mas_right);
-                }];
+                [[FXAnimateContext sharedInstance] horizontalMove:view Duration:duration Distance:-[view viewSize].width Block:nil];
                 break;
             }
             case FXViewPushTypeTop:{
@@ -126,30 +126,23 @@ DEF_SINGLETON_INIT(FXViewContext)
                     make.height.equalTo(@([view viewSize].height));
                 }];
                 [view.superview layoutIfNeeded];//强制绘制
-                [view mas_updateConstraints:^(MASConstraintMaker *make) {
-                    make.top.equalTo(view.superview.mas_top);
-                }];
+                [[FXAnimateContext sharedInstance] verticalMove:view Duration:duration Distance:[view viewSize].height Block:nil];
                 break;
             }
             case FXViewPushTypeBottom:{
                 [view mas_makeConstraints:^(MASConstraintMaker *make) {
                     make.left.equalTo(view.superview.mas_left);
                     make.right.equalTo(view.superview.mas_right);
-                    make.bottom.equalTo(@(view.superview.frame.size.height+[view viewSize].height));
+                    make.top.equalTo(view.superview.mas_bottom);
                     make.height.equalTo(@([view viewSize].height));
                 }];
                 [view.superview layoutIfNeeded];//强制绘制
-                [view mas_updateConstraints:^(MASConstraintMaker *make) {
-                    make.bottom.equalTo(view.superview.mas_bottom);
-                }];
+                [[FXAnimateContext sharedInstance] verticalMove:view Duration:duration Distance:-[view viewSize].height Block:nil];
                 break;
             }
             default:
                 break;
         }
-        [UIView animateWithDuration:duration animations:^{
-            [view.superview layoutIfNeeded];//强制绘制
-        }];
     }
 }
 
@@ -169,43 +162,39 @@ DEF_SINGLETON_INIT(FXViewContext)
         }
         
         switch (type) {
-            case FXViewPushTypeNone:{
-                [view.superview removeFromSuperview];
+            case FXViewPushTypeAlert:{
+                [[FXAnimateContext sharedInstance] cancelAlert:view Duration:duration Block:^(BOOL success){
+                    [view.superview removeFromSuperview];
+                }];
                 break;
             }
             case FXViewPushTypeLeft:{
-                [view mas_updateConstraints:^(MASConstraintMaker *make) {
-                    make.left.equalTo(@(-[view viewSize].width));
+                [[FXAnimateContext sharedInstance] horizontalMove:view Duration:duration Distance:-[view viewSize].width Block:^(BOOL success){
+                    [view.superview removeFromSuperview];
                 }];
                 break;
             }
             case FXViewPushTypeRight:{
-                [view mas_updateConstraints:^(MASConstraintMaker *make) {
-                    make.right.equalTo(@(view.superview.frame.size.width+[view viewSize].width));
+                [[FXAnimateContext sharedInstance] horizontalMove:view Duration:duration Distance:[view viewSize].width Block:^(BOOL success){
+                    [view.superview removeFromSuperview];
                 }];
                 break;
             }
             case FXViewPushTypeTop:{
-                [view mas_updateConstraints:^(MASConstraintMaker *make) {
-                    make.top.equalTo(@(-[view viewSize].height));
+                [[FXAnimateContext sharedInstance] verticalMove:view Duration:duration Distance:-[view viewSize].height Block:^(BOOL success){
+                    [view.superview removeFromSuperview];
                 }];
                 break;
             }
             case FXViewPushTypeBottom:{
-                [view mas_updateConstraints:^(MASConstraintMaker *make) {
-                    make.bottom.equalTo(@(view.superview.frame.size.height+[view viewSize].height));
+                [[FXAnimateContext sharedInstance] verticalMove:view Duration:duration Distance:[view viewSize].height Block:^(BOOL success){
+                    [view.superview removeFromSuperview];
                 }];
                 break;
             }
             default:
                 break;
         }
-        
-        [UIView animateWithDuration:duration animations:^{
-            [view.superview layoutIfNeeded];//强制绘制
-        } completion:^(BOOL finished) {
-            [view.superview removeFromSuperview];
-        }];
     }
 }
 
