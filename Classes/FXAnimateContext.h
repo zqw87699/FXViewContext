@@ -11,18 +11,22 @@
 #import "FXSingleton.h"
 #import "IFXViewShowProtocol.h"
 
+typedef void (^SuccessBlock)(BOOL success);
+
 @interface FXAnimateContext : NSObject
 
 AS_SINGLETON(FXAnimateContext)
 
-- (void)shakeView:(UIView*)view Block:(void(^)(BOOL success))block;
+- (void)shakeView:(UIView*)view Block:(SuccessBlock)block;
 
-- (void)alertView:(UIView*)view Duration:(CGFloat)duration Block:(void(^)(BOOL success))block;
+- (void)alertView:(UIView*)view Duration:(CGFloat)duration Block:(SuccessBlock)block;
 
-- (void)cancelAlert:(UIView*)view Duration:(CGFloat)duration Block:(void(^)(BOOL success))block;
+- (void)cancelAlert:(UIView*)view Duration:(CGFloat)duration Block:(SuccessBlock)block;
 
-- (void)horizontalMove:(UIView*)view Duration:(CGFloat)duration Distance:(CGFloat)dis Block:(void(^)(BOOL success))block;
+- (void)horizontalMove:(UIView*)view Duration:(CGFloat)duration Distance:(CGFloat)dis Block:(SuccessBlock)block;
 
-- (void)verticalMove:(UIView*)view Duration:(CGFloat)duration Distance:(CGFloat)dis Block:(void(^)(BOOL success))block;
+- (void)verticalMove:(UIView*)view Duration:(CGFloat)duration Distance:(CGFloat)dis Block:(SuccessBlock)block;
+
+- (void)move:(UIView*)view Duration:(CGFloat)duration Point:(CGPoint)point Block:(SuccessBlock)block;
 
 @end

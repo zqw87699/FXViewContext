@@ -12,7 +12,7 @@
 
 DEF_SINGLETON(FXAnimateContext)
 
-- (void)shakeView:(UIView *)view Block:(void (^)(BOOL))block{
+- (void)shakeView:(UIView *)view Block:(SuccessBlock)block{
     CABasicAnimation* shake = [CABasicAnimation animationWithKeyPath:@"transform.translation.x"];
     shake.fromValue = [NSNumber numberWithFloat:-5];
     shake.toValue = [NSNumber numberWithFloat:5];
@@ -24,7 +24,7 @@ DEF_SINGLETON(FXAnimateContext)
     } completion:block];
 }
 
-- (void)alertView:(UIView *)view Duration:(CGFloat)duration Block:(void (^)(BOOL))block{
+- (void)alertView:(UIView *)view Duration:(CGFloat)duration Block:(SuccessBlock)block{
     CGAffineTransform origTransform = [view transform];
     [UIView animateKeyframesWithDuration:duration delay:0 options:UIViewKeyframeAnimationOptionCalculationModeLinear animations:^{
         [UIView addKeyframeWithRelativeStartTime:0.0f relativeDuration:1/2.0f animations:^{
@@ -36,7 +36,7 @@ DEF_SINGLETON(FXAnimateContext)
     } completion:block];
 }
 
-- (void)cancelAlert:(UIView *)view Duration:(CGFloat)duration Block:(void (^)(BOOL))block{
+- (void)cancelAlert:(UIView *)view Duration:(CGFloat)duration Block:(SuccessBlock)block{
     CGAffineTransform origTransform = [view transform];
     [UIView animateKeyframesWithDuration:duration delay:0 options:UIViewKeyframeAnimationOptionCalculationModeLinear animations:^{
         [UIView addKeyframeWithRelativeStartTime:0.0f relativeDuration:1/4.0f animations:^{
@@ -54,7 +54,7 @@ DEF_SINGLETON(FXAnimateContext)
     } completion:block];
 }
 
-- (void)horizontalMove:(UIView *)view Duration:(CGFloat)duration Distance:(CGFloat)dis Block:(void (^)(BOOL))block{
+- (void)horizontalMove:(UIView *)view Duration:(CGFloat)duration Distance:(CGFloat)dis Block:(SuccessBlock)block{
     [UIView animateWithDuration: duration delay: 0 options: UIViewAnimationOptionCurveLinear animations: ^{
         CGPoint center = view.center;
         center.x += dis;
@@ -62,7 +62,7 @@ DEF_SINGLETON(FXAnimateContext)
     } completion: block];
 }
 
-- (void)verticalMove:(UIView *)view Duration:(CGFloat)duration Distance:(CGFloat)dis Block:(void (^)(BOOL))block{
+- (void)verticalMove:(UIView *)view Duration:(CGFloat)duration Distance:(CGFloat)dis Block:(SuccessBlock)block{
     [UIView animateWithDuration: duration delay: 0 options: UIViewAnimationOptionCurveLinear animations: ^{
         CGPoint center = view.center;
         center.y += dis;
@@ -70,6 +70,11 @@ DEF_SINGLETON(FXAnimateContext)
     } completion: block];
 }
 
+- (void)move:(UIView *)view Duration:(CGFloat)duration Point:(CGPoint)point Block:(SuccessBlock)block{
+    [UIView animateWithDuration: duration delay: 0 options: UIViewAnimationOptionCurveLinear animations: ^{
+        view.center = point;
+    } completion: block];
+}
 
 
 @end
