@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "FXViewContext"
-  s.version      = "1.0.2"
+  s.version      = "1.0.3"
   s.summary      = "FX视图展示框架"
 
   s.homepage     = "https://github.com/zqw87699/FXViewContext"
@@ -22,8 +22,20 @@ Pod::Spec.new do |s|
   s.source_files = 'Classes/*'
   s.public_header_files = 'Classes/*.h'
 
-  s.dependency 'FXCommon/Core'
-  s.dependency 'Masonry', '1.0.2'
+  s.subspec 'Core' do |core|
+    core.source_files = 'Classes/Core/*'
+    core.public_header_files = 'Classes/Core/*.h'
+    core.dependency 'FXCommon/Core'
+    core.dependency 'Masonry', '1.0.2'
+  end
+
+  s.subspec 'Extension' do |extension|
+    extension.source_files = 'Classes/Extension/*'
+    extension.public_header_files = 'Classes/Extension/*.h'
+    extension.dependency 'FXCommon/Base'
+  end
+
+
   s.dependency 'ReactiveObjC', '2.1.2'
 
 end
