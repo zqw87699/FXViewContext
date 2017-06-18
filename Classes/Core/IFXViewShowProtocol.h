@@ -48,7 +48,7 @@ typedef NS_ENUM(NSInteger,FXViewPushType){
 /**
  *  是否拥有背景
  *
- *  default NO
+ *  default YES
  */
 - (BOOL)hasBackground;
 
