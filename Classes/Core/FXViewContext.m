@@ -41,34 +41,62 @@ DEF_SINGLETON_INIT(FXViewContext)
 - (UIView*)formatView:(UIView<IFXViewShowProtocol> *)view Root:(UIView *)root{
     BOOL hasbg = self.hasBackground;
     CGFloat alpha = self.backgroundAlpha;
+    BOOL touchClose = self.touchClose;
     if ([view respondsToSelector:@selector(hasBackground)]) {
         hasbg = [view hasBackground];
         if ([view respondsToSelector:@selector(backgroundAlpha)]) {
             alpha = [view backgroundAlpha];
         }
+        if ([view respondsToSelector:@selector(touchClose)]) {
+            touchClose = [view touchClose];
+        }
     }
-    UIView *father = [[UIView alloc] init];
-    [father setBackgroundColor:[UIColor clearColor]];
-    [root addSubview:father];
-    [father mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.edges.equalTo(root);
-    }];
     if (hasbg) {
-        UIButton *bgv = [[UIButton alloc] init];
-        [bgv setBackgroundColor:[UIColor blackColor]];
-        [bgv setAlpha:alpha];
-        FX_WEAK_REF_TYPE selfObject = self;
-        [[bgv rac_signalForControlEvents:UIControlEventTouchUpInside] subscribeNext:^(__kindof UIControl * _Nullable x) {
-            [selfObject closeView:view];
+        UIButton *father = [[UIButton alloc] init];
+        [father setBackgroundColor:[UIColor blackColor]];
+        [father setAlpha:alpha];
+        [root addSubview:father];
+        [father mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.equalTo(root);
         }];
-        [father addSubview:bgv];
-        [bgv mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.edges.equalTo(father);
-        }];
+        if (touchClose) {
+            FX_WEAK_REF_TYPE selfObject = self;
+            [[father rac_signalForControlEvents:UIControlEventTouchUpInside] subscribeNext:^(__kindof UIControl * _Nullable x) {
+                [selfObject closeView:view];
+            }];
+        }
+        [father addSubview:view];
+        [root layoutIfNeeded];
+        return father;
+    }else{
+        [root addSubview:view];
+        return root;
     }
-    [father addSubview:view];
-    [root layoutIfNeeded];//强制绘制
-    return father;
+    
+    
+    
+//    UIView *father = [[UIView alloc] init];
+//    [father setBackgroundColor:[UIColor clearColor]];
+//    [root addSubview:father];
+//    [father mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.edges.equalTo(root);
+//    }];
+//    if (hasbg) {
+//        UIButton *bgv = [[UIButton alloc] init];
+//        [bgv setBackgroundColor:[UIColor blackColor]];
+//        [bgv setAlpha:alpha];
+//        FX_WEAK_REF_TYPE selfObject = self;
+//        [[bgv rac_signalForControlEvents:UIControlEventTouchUpInside] subscribeNext:^(__kindof UIControl * _Nullable x) {
+//            [selfObject closeView:view];
+//        }];
+//        [father addSubview:bgv];
+//        [bgv mas_makeConstraints:^(MASConstraintMaker *make) {
+//            make.edges.equalTo(father);
+//        }];
+//    }
+//    [father addSubview:view];
+//    [root layoutIfNeeded];//强制绘制
+//    return father;
 }
 
 - (void)showView:(UIView<IFXViewShowProtocol> *)view Root:(UIView *)root{
@@ -86,57 +114,27 @@ DEF_SINGLETON_INIT(FXViewContext)
         }
         switch (type) {
             case FXViewPushTypeAlert:{
-                [view mas_makeConstraints:^(MASConstraintMaker *make) {
-                    make.centerX.equalTo(view.superview.mas_centerX);
-                    make.centerY.equalTo(view.superview.mas_centerY);
-                    make.width.equalTo(@([view viewSize].width));
-                    make.height.equalTo(@([view viewSize].height));
-                }];
-                [view.superview layoutIfNeeded];
+                [view setFrame:CGRectMake(view.superview.bounds.size.width/2.0-[view viewSize].width/2.0, view.superview.bounds.size.height/2.0-[view viewSize].height, [view viewSize].width, [view viewSize].height)];
                 [[FXAnimateContext sharedInstance] alertView:view Duration:duration Block:nil];
                 break;
             }
             case FXViewPushTypeLeft:{
-                [view mas_makeConstraints:^(MASConstraintMaker *make) {
-                    make.top.equalTo(view.superview.mas_top);
-                    make.bottom.equalTo(view.superview.mas_bottom);
-                    make.left.equalTo(@(-[view viewSize].width));
-                    make.width.equalTo(@([view viewSize].width));
-                }];
-                [view.superview layoutIfNeeded];//强制绘制
+                [view setFrame:CGRectMake(-[view viewSize].width, 0, [view viewSize].width, view.superview.bounds.size.height)];
                 [[FXAnimateContext sharedInstance] horizontalMove:view Duration:duration Distance:[view viewSize].width Block:nil];
                 break;
             }
             case FXViewPushTypeRight:{
-                [view mas_makeConstraints:^(MASConstraintMaker *make) {
-                    make.top.equalTo(view.superview.mas_top);
-                    make.bottom.equalTo(view.superview.mas_bottom);
-                    make.left.equalTo(view.superview.mas_right);
-                    make.width.equalTo(@([view viewSize].width));
-                }];
-                [view.superview layoutIfNeeded];//强制绘制
+                [view setFrame:CGRectMake(view.superview.bounds.size.width, 0, [view viewSize].width, view.superview.bounds.size.height)];
                 [[FXAnimateContext sharedInstance] horizontalMove:view Duration:duration Distance:-[view viewSize].width Block:nil];
                 break;
             }
             case FXViewPushTypeTop:{
-                [view mas_makeConstraints:^(MASConstraintMaker *make) {
-                    make.left.equalTo(view.superview.mas_left);
-                    make.right.equalTo(view.superview.mas_right);
-                    make.top.equalTo(@(-[view viewSize].height));
-                    make.height.equalTo(@([view viewSize].height));
-                }];
-                [view.superview layoutIfNeeded];//强制绘制
+                [view setFrame:CGRectMake(0, -[view viewSize].height, view.superview.bounds.size.width, [view viewSize].height)];
                 [[FXAnimateContext sharedInstance] verticalMove:view Duration:duration Distance:[view viewSize].height Block:nil];
                 break;
             }
             case FXViewPushTypeBottom:{
-                [view mas_makeConstraints:^(MASConstraintMaker *make) {
-                    make.left.equalTo(view.superview.mas_left);
-                    make.right.equalTo(view.superview.mas_right);
-                    make.top.equalTo(view.superview.mas_bottom);
-                    make.height.equalTo(@([view viewSize].height));
-                }];
-                [view.superview layoutIfNeeded];//强制绘制
+                [view setFrame:CGRectMake(0, view.superview.bounds.size.height, view.superview.bounds.size.width, [view viewSize].height)];
                 [[FXAnimateContext sharedInstance] verticalMove:view Duration:duration Distance:-[view viewSize].height Block:nil];
                 break;
             }
@@ -161,34 +159,59 @@ DEF_SINGLETON_INIT(FXViewContext)
             duration = [view animatedDuration];
         }
         
+        BOOL hasBackground = self.hasBackground;
+        if ([view respondsToSelector:@selector(hasBackground)]) {
+            hasBackground = [view hasBackground];
+        }
+        
         switch (type) {
             case FXViewPushTypeAlert:{
                 [[FXAnimateContext sharedInstance] cancelAlert:view Duration:duration Block:^(BOOL success){
-                    [view.superview removeFromSuperview];
+                    if (hasBackground) {
+                        [view.superview removeFromSuperview];
+                    }else{
+                        [view removeFromSuperview];
+                    }
                 }];
                 break;
             }
             case FXViewPushTypeLeft:{
                 [[FXAnimateContext sharedInstance] horizontalMove:view Duration:duration Distance:-[view viewSize].width Block:^(BOOL success){
-                    [view.superview removeFromSuperview];
+                    if (hasBackground) {
+                        [view.superview removeFromSuperview];
+                    }else{
+                        [view removeFromSuperview];
+                    }
                 }];
                 break;
             }
             case FXViewPushTypeRight:{
                 [[FXAnimateContext sharedInstance] horizontalMove:view Duration:duration Distance:[view viewSize].width Block:^(BOOL success){
-                    [view.superview removeFromSuperview];
+                    if (hasBackground) {
+                        [view.superview removeFromSuperview];
+                    }else{
+                        [view removeFromSuperview];
+                    }
                 }];
                 break;
             }
             case FXViewPushTypeTop:{
                 [[FXAnimateContext sharedInstance] verticalMove:view Duration:duration Distance:-[view viewSize].height Block:^(BOOL success){
-                    [view.superview removeFromSuperview];
+                    if (hasBackground) {
+                        [view.superview removeFromSuperview];
+                    }else{
+                        [view removeFromSuperview];
+                    }
                 }];
                 break;
             }
             case FXViewPushTypeBottom:{
                 [[FXAnimateContext sharedInstance] verticalMove:view Duration:duration Distance:[view viewSize].height Block:^(BOOL success){
-                    [view.superview removeFromSuperview];
+                    if (hasBackground) {
+                        [view.superview removeFromSuperview];
+                    }else{
+                        [view removeFromSuperview];
+                    }
                 }];
                 break;
             }
