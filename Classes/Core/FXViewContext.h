@@ -10,6 +10,7 @@
 #import <UIKit/UIKit.h>
 #import "FXSingleton.h"
 #import "IFXViewShowProtocol.h"
+#import "FXAnimateContext.h"
 
 @interface FXViewContext : NSObject
 
@@ -18,5 +19,7 @@ AS_SINGLETON(FXViewContext)
 - (void)showView:(UIView<IFXViewShowProtocol>*)view Root:(UIView*)root;
 
 - (void)closeView:(UIView<IFXViewShowProtocol>*)view;
+
+- (void)closeView:(UIView<IFXViewShowProtocol> *)view Block:(SuccessBlock)block;
 
 @end

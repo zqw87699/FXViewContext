@@ -10,7 +10,6 @@
 #import "Masonry.h"
 #import "ReactiveObjC.h"
 #import "FXCommon.h"
-#import "FXAnimateContext.h"
 
 @interface FXViewContext()
 
@@ -52,16 +51,22 @@ DEF_SINGLETON_INIT(FXViewContext)
         }
     }
     if (hasbg) {
-        UIButton *father = [[UIButton alloc] init];
-        [father setBackgroundColor:[UIColor blackColor]];
-        [father setAlpha:alpha];
+        UIView *father = [[UIView alloc] init];
+        [father setBackgroundColor:[UIColor clearColor]];
         [root addSubview:father];
         [father mas_makeConstraints:^(MASConstraintMaker *make) {
             make.edges.equalTo(root);
         }];
+        UIButton *btn = [[UIButton alloc] init];
+        [btn setBackgroundColor:[UIColor blackColor]];
+        [btn setAlpha:alpha];
+        [father addSubview:btn];
+        [btn mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.equalTo(father);
+        }];
         if (touchClose) {
             FX_WEAK_REF_TYPE selfObject = self;
-            [[father rac_signalForControlEvents:UIControlEventTouchUpInside] subscribeNext:^(__kindof UIControl * _Nullable x) {
+            [[btn rac_signalForControlEvents:UIControlEventTouchUpInside] subscribeNext:^(__kindof UIControl * _Nullable x) {
                 [selfObject closeView:view];
             }];
         }
@@ -72,31 +77,6 @@ DEF_SINGLETON_INIT(FXViewContext)
         [root addSubview:view];
         return root;
     }
-    
-    
-    
-//    UIView *father = [[UIView alloc] init];
-//    [father setBackgroundColor:[UIColor clearColor]];
-//    [root addSubview:father];
-//    [father mas_makeConstraints:^(MASConstraintMaker *make) {
-//        make.edges.equalTo(root);
-//    }];
-//    if (hasbg) {
-//        UIButton *bgv = [[UIButton alloc] init];
-//        [bgv setBackgroundColor:[UIColor blackColor]];
-//        [bgv setAlpha:alpha];
-//        FX_WEAK_REF_TYPE selfObject = self;
-//        [[bgv rac_signalForControlEvents:UIControlEventTouchUpInside] subscribeNext:^(__kindof UIControl * _Nullable x) {
-//            [selfObject closeView:view];
-//        }];
-//        [father addSubview:bgv];
-//        [bgv mas_makeConstraints:^(MASConstraintMaker *make) {
-//            make.edges.equalTo(father);
-//        }];
-//    }
-//    [father addSubview:view];
-//    [root layoutIfNeeded];//强制绘制
-//    return father;
 }
 
 - (void)showView:(UIView<IFXViewShowProtocol> *)view Root:(UIView *)root{
@@ -136,6 +116,88 @@ DEF_SINGLETON_INIT(FXViewContext)
             case FXViewPushTypeBottom:{
                 [view setFrame:CGRectMake(0, view.superview.bounds.size.height, view.superview.bounds.size.width, [view viewSize].height)];
                 [[FXAnimateContext sharedInstance] verticalMove:view Duration:duration Distance:-[view viewSize].height Block:nil];
+                break;
+            }
+            default:
+                break;
+        }
+    }
+}
+
+- (void)closeView:(UIView<IFXViewShowProtocol> *)view Block:(SuccessBlock)block{
+    if (view && view.superview) {
+        
+        [view.superview layoutIfNeeded];
+        
+        FXViewPushType type = self.pushType;
+        if ([view respondsToSelector:@selector(pushType)]) {
+            type = [view pushType];
+        }
+        
+        NSTimeInterval duration = self.animatedDuration;
+        if ([view respondsToSelector:@selector(animatedDuration)]) {
+            duration = [view animatedDuration];
+        }
+        
+        BOOL hasBackground = self.hasBackground;
+        if ([view respondsToSelector:@selector(hasBackground)]) {
+            hasBackground = [view hasBackground];
+        }
+        
+        switch (type) {
+            case FXViewPushTypeAlert:{
+                [[FXAnimateContext sharedInstance] cancelAlert:view Duration:duration Block:^(BOOL success){
+                    if (hasBackground) {
+                        [view.superview removeFromSuperview];
+                    }else{
+                        [view removeFromSuperview];
+                    }
+                    if (block) block(success);
+                }];
+                break;
+            }
+            case FXViewPushTypeLeft:{
+                [[FXAnimateContext sharedInstance] horizontalMove:view Duration:duration Distance:-[view viewSize].width Block:^(BOOL success){
+                    if (hasBackground) {
+                        [view.superview removeFromSuperview];
+                    }else{
+                        [view removeFromSuperview];
+                    }
+                    if (block) block(success);
+                }];
+                break;
+            }
+            case FXViewPushTypeRight:{
+                [[FXAnimateContext sharedInstance] horizontalMove:view Duration:duration Distance:[view viewSize].width Block:^(BOOL success){
+                    if (hasBackground) {
+                        [view.superview removeFromSuperview];
+                    }else{
+                        [view removeFromSuperview];
+                    }
+                    if (block) block(success);
+                }];
+                break;
+            }
+            case FXViewPushTypeTop:{
+                [[FXAnimateContext sharedInstance] verticalMove:view Duration:duration Distance:-[view viewSize].height Block:^(BOOL success){
+                    if (hasBackground) {
+                        [view.superview removeFromSuperview];
+                    }else{
+                        [view removeFromSuperview];
+                    }
+                    if (block) block(success);
+                }];
+                break;
+            }
+            case FXViewPushTypeBottom:{
+                [[FXAnimateContext sharedInstance] verticalMove:view Duration:duration Distance:[view viewSize].height Block:^(BOOL success){
+                    if (hasBackground) {
+                        [view.superview removeFromSuperview];
+                    }else{
+                        [view removeFromSuperview];
+                    }
+                    if (block) block(success);
+                }];
                 break;
             }
             default:
