@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "FXViewContext"
-  s.version      = "1.0.6"
+  s.version      = "1.0.7"
   s.summary      = "FX视图展示框架"
 
   s.homepage     = "https://github.com/zqw87699/FXViewContext"

@@ -23,6 +23,8 @@
 
 @property (nonatomic, assign) BOOL touchClose;
 
+@property (nonatomic, assign) CGFloat ratioScale;
+
 @end
 
 @implementation FXViewContext
@@ -35,6 +37,7 @@ DEF_SINGLETON_INIT(FXViewContext)
     self.backgroundAlpha = 0.3f;
     self.pushType = FXViewPushTypeAlert;
     self.touchClose = YES;
+    self.ratioScale = 1.0f;
 }
 
 - (UIView*)formatView:(UIView<IFXViewShowProtocol> *)view Root:(UIView *)root{
@@ -43,6 +46,8 @@ DEF_SINGLETON_INIT(FXViewContext)
     BOOL touchClose = self.touchClose;
     if ([view respondsToSelector:@selector(hasBackground)]) {
         hasbg = [view hasBackground];
+    }
+    if (hasbg) {
         if ([view respondsToSelector:@selector(backgroundAlpha)]) {
             alpha = [view backgroundAlpha];
         }
@@ -92,9 +97,16 @@ DEF_SINGLETON_INIT(FXViewContext)
         if ([view respondsToSelector:@selector(animatedDuration)]) {
             duration = [view animatedDuration];
         }
+        CGFloat ratioScale = self.ratioScale;
+        if ([view respondsToSelector:@selector(ratioScale)]) {
+            ratioScale = [view ratioScale];
+        }
         switch (type) {
             case FXViewPushTypeAlert:{
-                [view setFrame:CGRectMake(view.superview.bounds.size.width/2.0-[view viewSize].width/2.0, view.superview.bounds.size.height/2.0-[view viewSize].height, [view viewSize].width, [view viewSize].height)];
+                [view setFrame:CGRectMake(view.superview.bounds.size.width/2.0-[view viewSize].width/2.0, view.superview.bounds.size.height/2.0-[view viewSize].height/2.0, [view viewSize].width, [view viewSize].height)];
+                CGAffineTransform transform = view.transform;
+                transform = CGAffineTransformScale(transform, ratioScale,ratioScale);
+                view.transform = transform;
                 [[FXAnimateContext sharedInstance] alertView:view Duration:duration Block:nil];
                 break;
             }

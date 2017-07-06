@@ -64,9 +64,14 @@ typedef NS_ENUM(NSInteger,FXViewPushType){
 /**
  *  页面推入方式
  *
- *  default FXViewPushTypeNone
+ *  default FXViewPushTypeAlert
  */
 - (FXViewPushType)pushType;
+
+/*
+ *  缩放比例
+ */
+- (CGFloat)ratioScale;
 
 /**
  *  是否点击推出
