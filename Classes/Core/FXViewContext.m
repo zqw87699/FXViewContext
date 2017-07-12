@@ -25,6 +25,8 @@
 
 @property (nonatomic, assign) CGFloat ratioScale;
 
+@property (nonatomic, assign) CGFloat alertOffset;
+
 @end
 
 @implementation FXViewContext
@@ -38,6 +40,7 @@ DEF_SINGLETON_INIT(FXViewContext)
     self.pushType = FXViewPushTypeAlert;
     self.touchClose = YES;
     self.ratioScale = 1.0f;
+    self.alertOffset = 0.0f;
 }
 
 - (UIView*)formatView:(UIView<IFXViewShowProtocol> *)view Root:(UIView *)root{
@@ -101,9 +104,13 @@ DEF_SINGLETON_INIT(FXViewContext)
         if ([view respondsToSelector:@selector(ratioScale)]) {
             ratioScale = [view ratioScale];
         }
+        CGFloat alertOffset = self.alertOffset;
+        if ([view respondsToSelector:@selector(alertOffset)]) {
+            alertOffset = [view alertOffset];
+        }
         switch (type) {
             case FXViewPushTypeAlert:{
-                [view setFrame:CGRectMake(view.superview.bounds.size.width/2.0-[view viewSize].width/2.0, view.superview.bounds.size.height/2.0-[view viewSize].height/2.0, [view viewSize].width, [view viewSize].height)];
+                [view setFrame:CGRectMake(view.superview.bounds.size.width/2.0-[view viewSize].width/2.0, view.superview.bounds.size.height/2.0-[view viewSize].height/2.0+alertOffset, [view viewSize].width, [view viewSize].height)];
                 CGAffineTransform transform = view.transform;
                 transform = CGAffineTransformScale(transform, ratioScale,ratioScale);
                 view.transform = transform;

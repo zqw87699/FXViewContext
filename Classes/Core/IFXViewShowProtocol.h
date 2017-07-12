@@ -73,6 +73,11 @@ typedef NS_ENUM(NSInteger,FXViewPushType){
  */
 - (CGFloat)ratioScale;
 
+/*
+ *  弹框偏移量
+ */
+- (CGFloat)alertOffset;
+
 /**
  *  是否点击推出
  *
